@@ -1,7 +1,6 @@
 from typing import TypedDict
-from datetime import datetime
 
 class PasswordReset(TypedDict):
     user_id: int
     token: str
-    expiry: datetime
+    expires_at: str  # ISO format datetime string
