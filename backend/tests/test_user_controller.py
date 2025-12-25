@@ -43,3 +43,35 @@ class UserControllerTestCase(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 400)
         self.assertIn('Email must be unique', response.json['error'])
+
+    def test_user_login_success(self):
+        self.client.post('/users/register', json={
+            'email': 'test@example.com',
+            'password': 'Password1'
+        })
+        response = self.client.post('/users/login', json={
+            'email': 'test@example.com',
+            'password': 'Password1'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('token', response.json)
+
+    def test_user_login_invalid_email(self):
+        response = self.client.post('/users/login', json={
+            'email': 'invalid@example.com',
+            'password': 'Password1'
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Invalid email or password', response.json['error'])
+
+    def test_user_login_invalid_password(self):
+        self.client.post('/users/register', json={
+            'email': 'test@example.com',
+            'password': 'Password1'
+        })
+        response = self.client.post('/users/login', json={
+            'email': 'test@example.com',
+            'password': 'WrongPassword'
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Invalid email or password', response.json['error'])
