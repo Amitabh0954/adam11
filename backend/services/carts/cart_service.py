@@ -1,29 +1,44 @@
 from typing import Optional
-from backend.models.user import User
-from backend.models.shopping_cart import ShoppingCart, ShoppingCartItem
+from backend.models.shopping_cart import ShoppingCart, CartItem
 from backend.repositories.shopping_cart_repository import ShoppingCartRepository
 
 class CartService:
     def __init__(self, cart_repository: ShoppingCartRepository):
         self.cart_repository = cart_repository
 
-    def add_product_to_cart(self, user: User, product: ShoppingCartItem) -> None:
-        self.cart_repository.add_item(user, product)
+    def get_or_create_cart(self, user_id: int) -> ShoppingCart:
+        cart = self.cart_repository.get_cart_by_user_id(user_id)
+        if not cart:
+            cart = self.cart_repository.create_cart(user_id)
+        return cart
 
-    def view_cart(self, user: User) -> Optional[ShoppingCart]:
-        return self.cart_repository.get_cart(user)
+    def add_item_to_cart(self, user_id: int, product_id: int, quantity: int) -> ShoppingCart:
+        cart = self.get_or_create_cart(user_id)
+        for item in cart['items']:
+            if item['product_id'] == product_id:
+                item['quantity'] += quantity
+                break
+        else:
+            cart['items'].append(CartItem(product_id=product_id, quantity=quantity))
+        self.cart_repository.update_cart(cart)
+        return cart
 
-    def checkout(self, user: User) -> None:
-        self.cart_repository.clear_cart(user)
+    def remove_item_from_cart(self, user_id: int, product_id: int) -> ShoppingCart:
+        cart = self.cart_repository.get_cart_by_user_id(user_id)
+        if not cart:
+            raise ValueError("Cart not found")
 
-    def remove_product_from_cart(self, user: User, product_id: int, confirm: bool) -> None:
-        self.cart_repository.remove_item(user, product_id, confirm)
+        cart['items'] = [item for item in cart['items'] if item['product_id'] != product_id]
+        self.cart_repository.update_cart(cart)
+        return cart
 
-    def update_quantity(self, user: User, product_id: int, quantity: int) -> None:
-        self.cart_repository.update_quantity(user, product_id, quantity)
+    def clear_cart(self, user_id: int) -> None:
+        cart = self.cart_repository.get_cart_by_user_id(user_id)
+        if cart:
+            cart['items'] = []
+            self.cart_repository.update_cart(cart)
 
-    def save_cart(self, user: User) -> None:
-        self.cart_repository.save_cart(user)
-
-    def load_cart(self, user: User) -> None:
-        self.cart_repository.load_cart(user)
+    def delete_cart(self, user_id: int) -> None:
+        cart = self.cart_repository.get_cart_by_user_id(user_id)
+        if cart:
+            self.cart_repository.delete_cart(cart['id'])
