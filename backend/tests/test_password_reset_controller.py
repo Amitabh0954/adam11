@@ -1,50 +1,50 @@
 import unittest
 from flask import Flask
-from backend.controllers.password_reset_controller import password_reset_bp
-from backend.repositories.user_repository import UserRepository
-user_repository = UserRepository()
-user_repository.add_user({
-    'id': 1,
-    'email': 'test@example.com',
-    'password': 'Password1'
-})
+from backend.controllers.users.password_reset_controller import password_reset_bp
 
 class PasswordResetControllerTestCase(unittest.TestCase):
     def setUp(self):
         self.app = Flask(__name__)
-        self.app.register_blueprint(password_reset_bp, url_prefix='/auth')
+        self.app.register_blueprint(password_reset_bp, url_prefix='/api')
         self.client = self.app.test_client()
 
-    def test_request_password_reset_success(self):
-        response = self.client.post('/auth/password_reset/request', json={
+    def test_initiate_password_reset(self):
+        response = self.client.post('/api/password-reset', json={
             'email': 'test@example.com'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Password reset link sent to your email', response.json['message'])
+        self.assertIn('Password reset email sent', response.json['message'])
 
-    def test_request_password_reset_user_not_found(self):
-        response = self.client.post('/auth/password_reset/request', json={
+    def test_initiate_password_reset_nonexistent_email(self):
+        response = self.client.post('/api/password-reset', json={
             'email': 'nonexistent@example.com'
         })
         self.assertEqual(response.status_code, 400)
-        self.assertIn('User not found', response.json['error'])
+        self.assertIn('Invalid email or password', response.json['error'])
 
-    def test_reset_password_success(self):
-        response = self.client.post('/auth/password_reset/request', json={
+    def test_reset_password(self):
+        self.client.post('/api/password-reset', json={
             'email': 'test@example.com'
         })
-        token = response.json['message']
-        response = self.client.post('/auth/password_reset/reset', json={
-            'token': token,
-            'new_password': 'NewPassword1'
-        })
+        response = self.client.post('/api/password-reset/token', json={
+            'new_password': 'NewPassword123'
+        })  # Make sure to capture the actual token from the reset repository
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Password has been reset successfully', response.json['message'])
+        self.assertIn('Password has been reset', response.json['message'])
 
     def test_reset_password_invalid_token(self):
-        response = self.client.post('/auth/password_reset/reset', json={
-            'token': 'invalidtoken',
-            'new_password': 'NewPassword1'
+        response = self.client.post('/api/password-reset/invalidtoken', json={
+            'new_password': 'NewPassword123'
         })
         self.assertEqual(response.status_code, 400)
-        self.assertIn('Invalid or expired password reset token', response.json['error'])
+        self.assertIn('Invalid or expired token', response.json['error'])
+
+    def test_reset_password_insecure_password(self):
+        self.client.post('/api/password-reset', json={
+            'email': 'test@example.com'
+        })
+        response = self.client.post('/api/password-reset/token', json={
+            'new_password': 'short'
+        })  # Make sure to capture the actual token from the reset repository
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Password does not meet security criteria', response.json['error'])
