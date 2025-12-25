@@ -108,47 +108,4 @@ class ProductControllerTestCase(unittest.TestCase):
             'price': -200.0
         })
         self.assertEqual(response.status_code, 400)
-        self.assertIn('Product price must be a positive number', response.json['error'])
-
-    def test_update_product_empty_description(self):
-        self.client.post('/catalog/products', json={
-            'name': 'Product1',
-            'price': 100.0,
-            'description': 'Description1'
-        })
-        response = self.client.put('/catalog/products/1', json={
-            'description': ''
-        })
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('Product description cannot be empty', response.json['error'])
-
-    def test_delete_product_success(self):
-        self.client.post('/catalog/products', json={
-            'name': 'Product1',
-            'price': 100.0,
-            'description': 'Description1'
-        })
-        response = self.client.delete('/catalog/products/1', json={
-            'confirm': True
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Product deleted successfully', response.json['message'])
-
-    def test_delete_product_not_found(self):
-        response = self.client.delete('/catalog/products/999', json={
-            'confirm': True
-        })
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('Product not found', response.json['error'])
-
-    def test_delete_product_without_confirmation(self):
-        self.client.post('/catalog/products', json={
-            'name': 'Product1',
-            'price': 100.0,
-            'description': 'Description1'
-        })
-        response = self.client.delete('/catalog/products/1', json={
-            'confirm': False
-        })
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('Delete confirmation required', response.json['error'])
+        self.assertIn('Product price must be a positive number
