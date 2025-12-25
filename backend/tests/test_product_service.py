@@ -56,3 +56,12 @@ class ProductServiceTestCase(unittest.TestCase):
         product = self.product_service.add_product(name='Product1', price=100.0, description='Description1')
         with self.assertRaises(ValueError):
             self.product_service.update_product(product_id=product['id'], description='')
+
+    def test_delete_product_success(self):
+        product = self.product_service.add_product(name='Product1', price=100.0, description='Description1')
+        self.product_service.delete_product(product_id=product['id'])
+        self.assertIsNone(self.product_service.get_product(product['id']))
+
+    def test_delete_product_not_found(self):
+        with self.assertRaises(ValueError):
+            self.product_service.delete_product(product_id=999)
