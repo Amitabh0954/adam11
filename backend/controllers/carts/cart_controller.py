@@ -13,7 +13,7 @@ def get_cart():
     if user_id is None:
         return jsonify({"error": "User ID is required"}), 400
     
-    cart = cart_service.get_or_create_cart(user_id)
+    cart = cart_service.load_cart_state(user_id)
     total_price = cart_service.get_cart_total_price(cart)
     return jsonify({"cart": cart, "total_price": total_price}), 200
 
@@ -31,6 +31,7 @@ def add_item_to_cart():
 
     cart = cart_service.add_item_to_cart(user_id, product_id, quantity)
     total_price = cart_service.get_cart_total_price(cart)
+    cart_service.save_cart_state(user_id)
     return jsonify({"cart": cart, "total_price": total_price}), 200
 
 @cart_bp.route('/cart/items/<int:product_id>', methods=['DELETE'])
@@ -45,6 +46,7 @@ def remove_item_from_cart(product_id: int):
 
     cart = cart_service.remove_item_from_cart(user_id, product_id)
     total_price = cart_service.get_cart_total_price(cart)
+    cart_service.save_cart_state(user_id)
     return jsonify({"cart": cart, "total_price": total_price}), 200
 
 @cart_bp.route('/cart/items/<int:product_id>', methods=['PATCH'])
@@ -60,6 +62,7 @@ def update_item_quantity(product_id: int):
 
     cart = cart_service.update_item_quantity(user_id, product_id, quantity)
     total_price = cart_service.get_cart_total_price(cart)
+    cart_service.save_cart_state(user_id)
     return jsonify({"cart": cart, "total_price": total_price}), 200
 
 @cart_bp.route('/cart/clear', methods=['POST'])
@@ -69,4 +72,5 @@ def clear_cart():
         return jsonify({"error": "User ID is required"}), 400
 
     cart_service.clear_cart(user_id)
+    cart_service.save_cart_state(user_id)
     return jsonify({"message": "Cart cleared"}), 200
