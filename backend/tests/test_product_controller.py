@@ -64,29 +64,37 @@ class ProductControllerTestCase(unittest.TestCase):
         response = self.client.put('/api/products/1', json={
             'name': 'Updated Product',
             'price': 150.0,
-            'description': 'Updated Description'
+            'description': 'Updated Description',
+            'is_admin': True
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['name'], 'Updated Product')
 
-    def test_update_product_name_taken(self):
+    def test_update_product_non_admin(self):
         self.client.post('/api/products', json={
             'name': 'Test Product',
             'price': 100.0,
             'description': 'Test Description'
         })
-        self.client.post('/api/products', json={
-            'name': 'Another Product',
-            'price': 200.0,
-            'description': 'Another Description'
-        })
         response = self.client.put('/api/products/1', json={
-            'name': 'Another Product',
-            'price': 150.0,
-            'description': 'Updated Description'
+            'name': 'Updated Product',
+            'is_admin': False
         })
         self.assertEqual(response.status_code, 400)
-        self.assertIn('Product name must be unique', response.json['error'])
+        self.assertIn('Only admin can update product details', response.json['error'])
+
+    def test_update_product_invalid_price(self):
+        self.client.post('/api/products', json={
+            'name': 'Test Product',
+            'price': 100.0,
+            'description': 'Test Description'
+        })
+        response = self.client.put('/api/products/1', json={
+            'price': 'invalid',
+            'is_admin': True
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Price must be a numeric value', response.json['error'])
 
     def test_delete_product(self):
         self.client.post('/api/products', json={
