@@ -29,12 +29,14 @@ def get_product(product_id: int):
 @product_bp.route('/products/<int:product_id>', methods=['PUT'])
 def update_product(product_id: int):
     data = request.get_json()
+    is_admin = data.get('is_admin', False)
     try:
         product = product_service.update_product(
             product_id=product_id,
             name=data.get('name'),
             price=data.get('price'),
-            description=data.get('description')
+            description=data.get('description'),
+            is_admin=is_admin
         )
         return jsonify(product), 200
     except ValueError as e:
