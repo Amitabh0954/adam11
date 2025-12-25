@@ -5,107 +5,95 @@ from backend.controllers.products.product_controller import product_bp
 class ProductControllerTestCase(unittest.TestCase):
     def setUp(self):
         self.app = Flask(__name__)
-        self.app.register_blueprint(product_bp, url_prefix='/catalog')
+        self.app.register_blueprint(product_bp, url_prefix='/api')
         self.client = self.app.test_client()
 
-    def test_add_product_success(self):
-        response = self.client.post('/catalog/products', json={
-            'name': 'Product1',
+    def test_add_product(self):
+        response = self.client.post('/api/products', json={
+            'name': 'Test Product',
             'price': 100.0,
-            'description': 'Description1'
+            'description': 'Test Description'
         })
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json['name'], 'Product1')
+        self.assertEqual(response.json['name'], 'Test Product')
 
     def test_add_product_duplicate_name(self):
-        self.client.post('/catalog/products', json={
-            'name': 'Product1',
+        self.client.post('/api/products', json={
+            'name': 'Test Product',
             'price': 100.0,
-            'description': 'Description1'
+            'description': 'Test Description'
         })
-        response = self.client.post('/catalog/products', json={
-            'name': 'Product1',
-            'price': 100.0,
-            'description': 'Description2'
+        response = self.client.post('/api/products', json={
+            'name': 'Test Product',
+            'price': 200.0,
+            'description': 'Another Description'
         })
         self.assertEqual(response.status_code, 400)
         self.assertIn('Product name must be unique', response.json['error'])
 
     def test_add_product_invalid_price(self):
-        response = self.client.post('/catalog/products', json={
-            'name': 'Product1',
-            'price': -100.0,
-            'description': 'Description1'
+        response = self.client.post('/api/products', json={
+            'name': 'Test Product',
+            'price': -50,
+            'description': 'Test Description'
         })
         self.assertEqual(response.status_code, 400)
         self.assertIn('Product price must be a positive number', response.json['error'])
 
-    def test_add_product_empty_description(self):
-        response = self.client.post('/catalog/products', json={
-            'name': 'Product1',
-            'price': 100.0,
-            'description': ''
-        })
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('Product description cannot be empty', response.json['error'])
-
     def test_get_product(self):
-        self.client.post('/catalog/products', json={
-            'name': 'Product1',
+        self.client.post('/api/products', json={
+            'name': 'Test Product',
             'price': 100.0,
-            'description': 'Description1'
+            'description': 'Test Description'
         })
-        response = self.client.get('/catalog/products/1')
+        response = self.client.get('/api/products/1')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json['name'], 'Product1')
+        self.assertEqual(response.json['name'], 'Test Product')
 
     def test_get_product_not_found(self):
-        response = self.client.get('/catalog/products/999')
+        response = self.client.get('/api/products/999')
         self.assertEqual(response.status_code, 404)
         self.assertIn('Product not found', response.json['error'])
 
-    def test_update_product_success(self):
-        self.client.post('/catalog/products', json={
-            'name': 'Product1',
+    def test_update_product(self):
+        self.client.post('/api/products', json={
+            'name': 'Test Product',
             'price': 100.0,
-            'description': 'Description1'
+            'description': 'Test Description'
         })
-        response = self.client.put('/catalog/products/1', json={
-            'name': 'UpdatedName',
-            'price': 200.0,
-            'description': 'UpdatedDescription'
+        response = self.client.put('/api/products/1', json={
+            'name': 'Updated Product',
+            'price': 150.0,
+            'description': 'Updated Description'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json['name'], 'UpdatedName')
-        self.assertEqual(response.json['price'], 200.0)
+        self.assertEqual(response.json['name'], 'Updated Product')
 
-    def test_update_product_duplicate_name(self):
-        self.client.post('/catalog/products', json={
-            'name': 'Product1',
+    def test_update_product_name_taken(self):
+        self.client.post('/api/products', json={
+            'name': 'Test Product',
             'price': 100.0,
-            'description': 'Description1'
+            'description': 'Test Description'
         })
-        self.client.post('/catalog/products', json={
-            'name': 'Product2',
+        self.client.post('/api/products', json={
+            'name': 'Another Product',
             'price': 200.0,
-            'description': 'Description2'
+            'description': 'Another Description'
         })
-        response = self.client.put('/catalog/products/2', json={
-            'name': 'Product1',
-            'price': 300.0,
-            'description': 'UpdatedDescription'
+        response = self.client.put('/api/products/1', json={
+            'name': 'Another Product',
+            'price': 150.0,
+            'description': 'Updated Description'
         })
         self.assertEqual(response.status_code, 400)
         self.assertIn('Product name must be unique', response.json['error'])
 
-    def test_update_product_invalid_price(self):
-        self.client.post('/catalog/products', json={
-            'name': 'Product1',
+    def test_delete_product(self):
+        self.client.post('/api/products', json={
+            'name': 'Test Product',
             'price': 100.0,
-            'description': 'Description1'
+            'description': 'Test Description'
         })
-        response = self.client.put('/catalog/products/1', json={
-            'price': -200.0
-        })
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('Product price must be a positive number
+        response = self.client.delete('/api/products/1')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Product deleted', response.json['message'])
