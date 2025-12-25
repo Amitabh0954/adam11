@@ -58,3 +58,20 @@ class CartServiceTestCase(unittest.TestCase):
         self.cart_service.add_product_to_cart(self.user, cart_item)
         with self.assertRaises(ValueError):
             self.cart_service.update_quantity(self.user, self.product['id'], quantity=-1)
+
+    def test_save_cart(self):
+        cart_item = ShoppingCartItem(product=self.product, quantity=1)
+        self.cart_service.add_product_to_cart(self.user, cart_item)
+        self.cart_service.save_cart(self.user)
+        # Assuming `load_cart_from_db` returns the correct stored cart data
+        self.cart_service.load_cart(self.user)
+        cart = self.cart_service.view_cart(self.user)
+        self.assertEqual(len(cart['items']), 1)
+
+    def test_load_cart(self):
+        cart_item = ShoppingCartItem(product=self.product, quantity=1)
+        self.cart_service.add_product_to_cart(self.user, cart_item)
+        self.cart_service.save_cart(self.user)
+        self.cart_service.load_cart(self.user)
+        cart = self.cart_service.view_cart(self.user)
+        self.assertEqual(len(cart['items']), 1)
