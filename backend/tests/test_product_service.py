@@ -64,6 +64,11 @@ class ProductServiceTestCase(unittest.TestCase):
 
     def test_delete_product(self):
         product = self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
-        self.product_service.delete_product(product_id=product['id'])
+        self.product_service.delete_product(product_id=product['id'], is_admin=True)
         fetched_product = self.product_service.get_product(product['id'])
         self.assertIsNone(fetched_product)
+
+    def test_delete_product_non_admin(self):
+        product = self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
+        with self.assertRaises(ValueError):
+            self.product_service.delete_product(product_id=product['id'], is_admin=False)
