@@ -1,61 +1,28 @@
 from typing import Optional
-from backend.models.shopping_cart import ShoppingCart, ShoppingCartItem
-from backend.models.user import User
+from backend.models.shopping_cart import ShoppingCart
 
 class ShoppingCartRepository:
     def __init__(self):
         self.carts = {}
+        self.user_carts = {}
 
-    def add_item(self, user: User, item: ShoppingCartItem) -> None:
-        if user['id'] not in self.carts:
-            self.carts[user['id']] = {'user': user, 'items': [], 'total_price': 0.0}
-        self.carts[user['id']]['items'].append(item)
-        self._recalculate_total_price(user['id'])
+    def create_cart(self, user_id: int) -> ShoppingCart:
+        cart = ShoppingCart(id=len(self.carts) + 1, user_id=user_id, items=[])
+        self.carts[cart['id']] = cart
+        self.user_carts[user_id] = cart
+        return cart
 
-    def get_cart(self, user: User) -> Optional[ShoppingCart]:
-        return self.carts.get(user['id'])
+    def get_cart_by_id(self, cart_id: int) -> Optional<ShoppingCart]:
+        return self.carts.get(cart_id)
 
-    def clear_cart(self, user: User) -> None:
-        if user['id'] in self.carts:
-            self.carts[user['id']]['items'] = []
-            self.carts[user['id']]['total_price'] = 0.0
+    def get_cart_by_user_id(self, user_id: int) -> Optional<ShoppingCart]:
+        return self.user_carts.get(user_id)
 
-    def remove_item(self, user: User, product_id: int, confirm: bool) -> None:
-        if not confirm:
-            raise ValueError("Remove confirmation required")
-        if user['id'] in self.carts:
-            items = self.carts[user['id']]['items']
-            for item in items:
-                if item['product']['id'] == product_id:
-                    items.remove(item)
-                    break
-            self._recalculate_total_price(user['id'])
+    def update_cart(self, cart: ShoppingCart) -> None:
+        self.carts[cart['id']] = cart
+        self.user_carts[cart['user_id']] = cart
 
-    def update_quantity(self, user: User, product_id: int, quantity: int) -> None:
-        if quantity <= 0:
-            raise ValueError("Quantity must be a positive integer")
-        if user['id'] in self.carts:
-            items = self.carts[user['id']]['items']
-            for item in items:
-                if item['product']['id'] == product_id:
-                    item['quantity'] = quantity
-                    break
-            self._recalculate_total_price(user['id'])
-
-    def _recalculate_total_price(self, user_id: int) -> None:
-        total_price = 0.0
-        for item in self.carts[user_id]['items']:
-            total_price += item['product']['price'] * item['quantity']
-        self.carts[user_id]['total_price'] = total_price
-
-    def save_cart(self, user: User) -> None:
-        # Assume `save_cart_to_db` is a function that saves the cart to the database
-        cart = self.get_cart(user)
+    def delete_cart(self, cart_id: int) -> None:
+        cart = self.carts.pop(cart_id, None)
         if cart:
-            save_cart_to_db(cart)
-
-    def load_cart(self, user: User) -> None:
-        # Assume `load_cart_from_db` is a function that loads the cart from the database
-        cart = load_cart_from_db(user['id'])
-        if cart:
-            self.carts[user['id']] = cart
+            self.user_carts.pop(cart['user_id'], None)
