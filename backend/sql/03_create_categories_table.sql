@@ -1,0 +1,6 @@
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    parent_id INTEGER,
+    FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
