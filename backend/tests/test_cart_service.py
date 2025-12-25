@@ -50,3 +50,17 @@ class CartServiceTestCase(unittest.TestCase):
         cart = self.cart_service.get_or_create_cart(self.user_id)
         total_price = self.cart_service.get_cart_total_price(cart)
         self.assertEqual(total_price, 200.0)
+
+    def test_save_cart_state(self):
+        self.cart_service.add_item_to_cart(self.user_id, product_id=1, quantity=2)
+        self.cart_service.save_cart_state(self.user_id)
+        cart = self.cart_service.load_cart_state(self.user_id)
+        self.assertEqual(len(cart['items']), 1)
+        self.assertEqual(cart['items'][0]['quantity'], 2)
+
+    def test_load_cart_state(self):
+        self.cart_service.add_item_to_cart(self.user_id, product_id=1, quantity=2)
+        self.cart_service.save_cart_state(self.user_id)
+        cart = self.cart_service.load_cart_state(self.user_id)
+        self.assertEqual(len(cart['items']), 1)
+        self.assertEqual(cart['items'][0]['quantity'], 2)
