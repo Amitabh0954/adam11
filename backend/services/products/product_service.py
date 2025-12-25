@@ -41,3 +41,8 @@ class ProductService:
 
         self.product_repository.add_product(product)
         return product
+
+    def delete_product(self, product_id: int) -> None:
+        if not self.product_repository.get_product_by_id(product_id):
+            raise ValueError("Product not found")
+        self.product_repository.remove_product(product_id)
