@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
 from backend.services.carts.cart_service import CartService
 from backend.repositories.shopping_cart_repository import ShoppingCartRepository
+from backend.repositories.product_repository import ProductRepository
 
 cart_bp = Blueprint('cart', __name__)
 cart_service = CartService(ShoppingCartRepository())
+cart_service.product_repository = ProductRepository()
 
 @cart_bp.route('/cart', methods=['GET'])
 def get_cart():
@@ -12,7 +14,8 @@ def get_cart():
         return jsonify({"error": "User ID is required"}), 400
     
     cart = cart_service.get_or_create_cart(user_id)
-    return jsonify(cart), 200
+    total_price = cart_service.get_cart_total_price(cart)
+    return jsonify({"cart": cart, "total_price": total_price}), 200
 
 @cart_bp.route('/cart/items', methods=['POST'])
 def add_item_to_cart():
@@ -27,7 +30,8 @@ def add_item_to_cart():
         return jsonify({"error": "Quantity must be greater than zero"}), 400
 
     cart = cart_service.add_item_to_cart(user_id, product_id, quantity)
-    return jsonify(cart), 200
+    total_price = cart_service.get_cart_total_price(cart)
+    return jsonify({"cart": cart, "total_price": total_price}), 200
 
 @cart_bp.route('/cart/items/<int:product_id>', methods=['DELETE'])
 def remove_item_from_cart(product_id: int):
@@ -35,8 +39,13 @@ def remove_item_from_cart(product_id: int):
     if user_id is None:
         return jsonify({"error": "User ID is required"}), 400
 
+    confirm = request.args.get('confirm', type=bool, default=False)
+    if not confirm:
+        return jsonify({"error": "Confirmation required to remove item"}), 400
+
     cart = cart_service.remove_item_from_cart(user_id, product_id)
-    return jsonify(cart), 200
+    total_price = cart_service.get_cart_total_price(cart)
+    return jsonify({"cart": cart, "total_price": total_price}), 200
 
 @cart_bp.route('/cart/clear', methods=['POST'])
 def clear_cart():
