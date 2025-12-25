@@ -39,3 +39,15 @@ def update_product(product_id):
         return jsonify(product), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+@product_bp.route('/products/<int:product_id>', methods=['DELETE'])
+def delete_product(product_id):
+    data = request.get_json()
+    try:
+        confirm = data.get('confirm')
+        if not confirm:
+            return jsonify({"error": "Delete confirmation required"}), 400
+        product_service.delete_product(product_id=product_id)
+        return jsonify({"message": "Product deleted successfully"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
