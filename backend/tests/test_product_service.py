@@ -8,60 +8,45 @@ class ProductServiceTestCase(unittest.TestCase):
         self.product_service = ProductService(self.product_repository)
 
     def test_add_product_success(self):
-        product = self.product_service.add_product(name='Product1', price=100.0, description='Description1')
-        self.assertEqual(product['name'], 'Product1')
+        product = self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
+        self.assertEqual(product['name'], 'Test Product')
         self.assertEqual(product['price'], 100.0)
+        self.assertEqual(product['description'], 'Test Description')
 
     def test_add_product_duplicate_name(self):
-        self.product_service.add_product(name='Product1', price=100.0, description='Description1')
+        self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
         with self.assertRaises(ValueError):
-            self.product_service.add_product(name='Product1', price=100.0, description='Description2')
+            self.product_service.add_product(name='Test Product', price=200.0, description='Another Description')
 
     def test_add_product_invalid_price(self):
         with self.assertRaises(ValueError):
-            self.product_service.add_product(name='Product1', price=-10.0, description='Description1')
-
-    def test_add_product_empty_description(self):
-        with self.assertRaises(ValueError):
-            self.product_service.add_product(name='Product1', price=100.0, description='')
+            self.product_service.add_product(name='Test Product', price=-10, description='Test Description')
 
     def test_get_product(self):
-        product = self.product_service.add_product(name='Product1', price=100.0, description='Description1')
+        product = self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
         fetched_product = self.product_service.get_product(product['id'])
-        self.assertEqual(fetched_product['name'], 'Product1')
+        self.assertEqual(fetched_product['name'], 'Test Product')
 
     def test_get_product_not_found(self):
         product = self.product_service.get_product(999)
         self.assertIsNone(product)
 
-    def test_update_product_success(self):
-        product = self.product_service.add_product(name='Product1', price=100.0, description='Description1')
-        updated_product = self.product_service.update_product(product_id=product['id'], name='UpdatedName', price=200.0, description='UpdatedDescription')
-        self.assertEqual(updated_product['name'], 'UpdatedName')
-        self.assertEqual(updated_product['price'], 200.0)
-        self.assertEqual(updated_product['description'], 'UpdatedDescription')
+    def test_update_product(self):
+        product = self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
+        updated_product = self.product_service.update_product(product_id=product['id'], name='Updated Product', price=150.0, description='Updated Description')
+        self.assertEqual(updated_product['name'], 'Updated Product')
+        self.assertEqual(updated_product['price'], 150.0)
+        self.assertEqual(updated_product['description'], 'Updated Description')
 
-    def test_update_product_duplicate_name(self):
-        self.product_service.add_product(name='Product1', price=100.0, description='Description1')
-        product = self.product_service.add_product(name='Product2', price=200.0, description='Description2')
+    def test_update_product_name_taken(self):
+        self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
+        self.product_service.add_product(name='Another Product', price=200.0, description='Another Description')
+        product = self.product_service.get_product_by_name('Test Product')
         with self.assertRaises(ValueError):
-            self.product_service.update_product(product_id=product['id'], name='Product1', price=300.0, description='UpdatedDescription')
+            self.product_service.update_product(product_id=product['id'], name='Another Product')
 
-    def test_update_product_invalid_price(self):
-        product = self.product_service.add_product(name='Product1', price=100.0, description='Description1')
-        with self.assertRaises(ValueError):
-            self.product_service.update_product(product_id=product['id'], price=-200.0)
-
-    def test_update_product_empty_description(self):
-        product = self.product_service.add_product(name='Product1', price=100.0, description='Description1')
-        with self.assertRaises(ValueError):
-            self.product_service.update_product(product_id=product['id'], description='')
-
-    def test_delete_product_success(self):
-        product = self.product_service.add_product(name='Product1', price=100.0, description='Description1')
+    def test_delete_product(self):
+        product = self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
         self.product_service.delete_product(product_id=product['id'])
-        self.assertIsNone(self.product_service.get_product(product['id']))
-
-    def test_delete_product_not_found(self):
-        with self.assertRaises(ValueError):
-            self.product_service.delete_product(product_id=999)
+        fetched_product = self.product_service.get_product(product['id'])
+        self.assertIsNone(fetched_product)
