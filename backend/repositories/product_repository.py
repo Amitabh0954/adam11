@@ -25,3 +25,8 @@ class ProductRepository:
             if product['name'] == name:
                 return product
         return None
+
+    def remove_product(self, product_id: int) -> None:
+        product = self.products.pop(product_id, None)
+        if product:
+            self.name_index.remove(product['name'])
