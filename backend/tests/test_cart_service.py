@@ -28,6 +28,11 @@ class CartServiceTestCase(unittest.TestCase):
         cart = self.cart_service.remove_item_from_cart(self.user_id, product_id=1)
         self.assertEqual(len(cart['items']), 0)
 
+    def test_update_item_quantity(self):
+        self.cart_service.add_item_to_cart(self.user_id, product_id=1, quantity=2)
+        cart = self.cart_service.update_item_quantity(self.user_id, product_id=1, quantity=5)
+        self.assertEqual(cart['items'][0]['quantity'], 5)
+
     def test_clear_cart(self):
         self.cart_service.add_item_to_cart(self.user_id, product_id=1, quantity=2)
         self.cart_service.clear_cart(self.user_id)
