@@ -21,3 +21,9 @@ class CartService:
 
     def update_quantity(self, user: User, product_id: int, quantity: int) -> None:
         self.cart_repository.update_quantity(user, product_id, quantity)
+
+    def save_cart(self, user: User) -> None:
+        self.cart_repository.save_cart(user)
+
+    def load_cart(self, user: User) -> None:
+        self.cart_repository.load_cart(user)
