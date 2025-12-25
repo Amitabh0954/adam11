@@ -18,3 +18,6 @@ class CartService:
 
     def remove_product_from_cart(self, user: User, product_id: int, confirm: bool) -> None:
         self.cart_repository.remove_item(user, product_id, confirm)
+
+    def update_quantity(self, user: User, product_id: int, quantity: int) -> None:
+        self.cart_repository.update_quantity(user, product_id, quantity)
