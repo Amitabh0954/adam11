@@ -8,154 +8,29 @@ class CartControllerTestCase(unittest.TestCase):
         self.app.register_blueprint(cart_bp, url_prefix='/api')
         self.client = self.app.test_client()
 
-    def test_add_to_cart(self):
-        response = self.client.post('/api/cart', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
-            'quantity': 1
-        })
+    def test_get_cart(self):
+        response = self.client.get('/api/cart', query_string={'user_id': 1})
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Product added to cart', response.json['message'])
+        self.assertEqual(response.json['user_id'], 1)
 
-    def test_view_cart(self):
-        self.client.post('/api/cart', json={
+    def test_add_item_to_cart(self):
+        response = self.client.post('/api/cart/items', json={
             'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
-            'quantity': 1
-        })
-        response = self.client.get('/api/cart', query_string={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com'
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('items', response.json)
-
-    def test_checkout(self):
-        self.client.post('/api/cart', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
-            'quantity': 1
-        })
-        response = self.client.post('/api/cart/checkout', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com'
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Checkout successful', response.json['message'])
-
-    def test_remove_from_cart(self):
-        self.client.post('/api/cart', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
-            'quantity': 1
-        })
-        response = self.client.post('/api/cart/remove', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
             'product_id': 1,
-            'confirm': True
+            'quantity': 2
         })
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Product removed from cart', response.json['message'])
+        self.assertEqual(len(response.json['items']), 1)
+        self.assertEqual(response.json['items'][0]['product_id'], 1)
 
-    def test_remove_from_cart_without_confirmation(self):
-        self.client.post('/api/cart', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
-            'quantity': 1
-        })
-        response = self.client.post('/api/cart/remove', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product_id': 1,
-            'confirm': False
-        })
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('Remove confirmation required', response.json['error'])
-
-    def test_update_quantity(self):
-        self.client.post('/api/cart', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
-            'quantity': 1
-        })
-        response = self.client.post('/api/cart/quantity', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product_id': 1,
-            'quantity': 5
-        })
+    def test_remove_item_from_cart(self):
+        self.client.post('/api/cart/items', json={'user_id': 1, 'product_id': 1, 'quantity': 2})
+        response = self.client.delete('/api/cart/items/1', query_string={'user_id': 1})
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Quantity updated', response.json['message'])
+        self.assertEqual(len(response.json['items']), 0)
 
-    def test_update_quantity_invalid(self):
-        self.client.post('/api/cart', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
-            'quantity': 1
-        })
-        response = self.client.post('/api/cart/quantity', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product_id': 1,
-            'quantity': -1
-        })
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('Quantity must be a positive integer', response.json['error'])
-
-    def test_save_cart(self):
-        self.client.post('/api/cart', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
-            'quantity': 1
-        })
-        response = self.client.post('/api/cart/save', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com'
-        })
+    def test_clear_cart(self):
+        self.client.post('/api/cart/items', json={'user_id': 1, 'product_id': 1, 'quantity': 2})
+        response = self.client.post('/api/cart/clear', json={'user_id': 1})
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Cart saved', response.json['message'])
-
-    def test_load_cart(self):
-        self.client.post('/api/cart', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
-            'quantity': 1
-        })
-        self.client.post('/api/cart/save', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com'
-        })
-        response = self.client.post('/api/cart/load', json={
-            'user_id': 1,
-            'username': 'testuser',
-            'email': 'test@example.com'
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Cart loaded', response.json['message'])
+        self.assertIn('Cart cleared', response.json['message'])
