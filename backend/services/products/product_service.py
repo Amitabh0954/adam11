@@ -50,5 +50,7 @@ class ProductService:
         self.product_repository.update_product(product)
         return product
 
-    def delete_product(self, product_id: int) -> None:
+    def delete_product(self, product_id: int, is_admin: bool = False) -> None:
+        if not is_admin:
+            raise ValueError("Only admin can delete products")
         self.product_repository.delete_product(product_id)
