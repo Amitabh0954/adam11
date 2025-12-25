@@ -42,3 +42,6 @@ class CartService:
         cart = self.cart_repository.get_cart_by_user_id(user_id)
         if cart:
             self.cart_repository.delete_cart(cart['id'])
+
+    def get_cart_total_price(self, cart: ShoppingCart) -> float:
+        return sum(item['quantity'] * self.product_repository.get_product_by_id(item['product_id'])['price'] for item in cart['items'])
