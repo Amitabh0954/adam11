@@ -63,3 +63,61 @@ class ProductControllerTestCase(unittest.TestCase):
         response = self.client.get('/catalog/products/999')
         self.assertEqual(response.status_code, 404)
         self.assertIn('Product not found', response.json['error'])
+
+    def test_update_product_success(self):
+        self.client.post('/catalog/products', json={
+            'name': 'Product1',
+            'price': 100.0,
+            'description': 'Description1'
+        })
+        response = self.client.put('/catalog/products/1', json={
+            'name': 'UpdatedName',
+            'price': 200.0,
+            'description': 'UpdatedDescription'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json['name'], 'UpdatedName')
+        self.assertEqual(response.json['price'], 200.0)
+
+    def test_update_product_duplicate_name(self):
+        self.client.post('/catalog/products', json={
+            'name': 'Product1',
+            'price': 100.0,
+            'description': 'Description1'
+        })
+        self.client.post('/catalog/products', json={
+            'name': 'Product2',
+            'price': 200.0,
+            'description': 'Description2'
+        })
+        response = self.client.put('/catalog/products/2', json={
+            'name': 'Product1',
+            'price': 300.0,
+            'description': 'UpdatedDescription'
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Product name must be unique', response.json['error'])
+
+    def test_update_product_invalid_price(self):
+        self.client.post('/catalog/products', json={
+            'name': 'Product1',
+            'price': 100.0,
+            'description': 'Description1'
+        })
+        response = self.client.put('/catalog/products/1', json={
+            'price': -200.0
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Product price must be a positive number', response.json['error'])
+
+    def test_update_product_empty_description(self):
+        self.client.post('/catalog/products', json={
+            'name': 'Product1',
+            'price': 100.0,
+            'description': 'Description1'
+        })
+        response = self.client.put('/catalog/products/1', json={
+            'description': ''
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Product description cannot be empty', response.json['error'])
