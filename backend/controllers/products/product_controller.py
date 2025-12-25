@@ -25,3 +25,17 @@ def get_product(product_id):
         return jsonify(product), 200
     else:
         return jsonify({"error": "Product not found"}), 404
+
+@product_bp.route('/products/<int:product_id>', methods=['PUT'])
+def update_product(product_id):
+    data = request.get_json()
+    try:
+        product = product_service.update_product(
+            product_id=product_id,
+            name=data.get('name'),
+            price=data.get('price'),
+            description=data.get('description')
+        )
+        return jsonify(product), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
