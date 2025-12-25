@@ -122,3 +122,40 @@ class CartControllerTestCase(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 400)
         self.assertIn('Quantity must be a positive integer', response.json['error'])
+
+    def test_save_cart(self):
+        self.client.post('/api/cart', json={
+            'user_id': 1,
+            'username': 'testuser',
+            'email': 'test@example.com',
+            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
+            'quantity': 1
+        })
+        response = self.client.post('/api/cart/save', json={
+            'user_id': 1,
+            'username': 'testuser',
+            'email': 'test@example.com'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Cart saved', response.json['message'])
+
+    def test_load_cart(self):
+        self.client.post('/api/cart', json={
+            'user_id': 1,
+            'username': 'testuser',
+            'email': 'test@example.com',
+            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
+            'quantity': 1
+        })
+        self.client.post('/api/cart/save', json={
+            'user_id': 1,
+            'username': 'testuser',
+            'email': 'test@example.com'
+        })
+        response = self.client.post('/api/cart/load', json={
+            'user_id': 1,
+            'username': 'testuser',
+            'email': 'test@example.com'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Cart loaded', response.json['message'])
