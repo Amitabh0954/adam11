@@ -63,3 +63,23 @@ def update_quantity():
         return jsonify({"message": "Quantity updated"}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+@cart_bp.route('/cart/save', methods=['POST'])
+def save_cart():
+    data = request.get_json()
+    try:
+        user = User(id=data['user_id'], username=data['username'], email=data['email'])
+        cart_service.save_cart(user)
+        return jsonify({"message": "Cart saved"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+@cart_bp.route('/cart/load', methods=['POST'])
+def load_cart():
+    data = request.get_json()
+    try:
+        user = User(id=data['user_id'], username=data['username'], email=data['email'])
+        cart_service.load_cart(user)
+        return jsonify({"message": "Cart loaded"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
