@@ -10,7 +10,7 @@ class ShoppingCartRepository:
         if user['id'] not in self.carts:
             self.carts[user['id']] = {'user': user, 'items': [], 'total_price': 0.0}
         self.carts[user['id']]['items'].append(item)
-        self.carts[user['id']]['total_price'] += item['product']['price'] * item['quantity']
+        self._recalculate_total_price(user['id'])
 
     def get_cart(self, user: User) -> Optional[ShoppingCart]:
         return self.carts.get(user['id'])
@@ -27,6 +27,23 @@ class ShoppingCartRepository:
             items = self.carts[user['id']]['items']
             for item in items:
                 if item['product']['id'] == product_id:
-                    self.carts[user['id']]['total_price'] -= item['product']['price'] * item['quantity']
                     items.remove(item)
                     break
+            self._recalculate_total_price(user['id'])
+
+    def update_quantity(self, user: User, product_id: int, quantity: int) -> None:
+        if quantity <= 0:
+            raise ValueError("Quantity must be a positive integer")
+        if user['id'] in self.carts:
+            items = self.carts[user['id']]['items']
+            for item in items:
+                if item['product']['id'] == product_id:
+                    item['quantity'] = quantity
+                    break
+            self._recalculate_total_price(user['id'])
+
+    def _recalculate_total_price(self, user_id: int) -> None:
+        total_price = 0.0
+        for item in self.carts[user_id]['items']:
+            total_price += item['product']['price'] * item['quantity']
+        self.carts[user_id]['total_price'] = total_price
