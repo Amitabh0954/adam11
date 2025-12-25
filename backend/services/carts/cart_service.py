@@ -15,3 +15,6 @@ class CartService:
 
     def checkout(self, user: User) -> None:
         self.cart_repository.clear_cart(user)
+
+    def remove_product_from_cart(self, user: User, product_id: int, confirm: bool) -> None:
+        self.cart_repository.remove_item(user, product_id, confirm)
