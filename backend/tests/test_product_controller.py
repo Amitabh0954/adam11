@@ -102,6 +102,35 @@ class ProductControllerTestCase(unittest.TestCase):
             'price': 100.0,
             'description': 'Test Description'
         })
-        response = self.client.delete('/api/products/1')
+        response = self.client.delete('/api/products/1', json={
+            'is_admin': True,
+            'confirm': True
+        })
         self.assertEqual(response.status_code, 200)
         self.assertIn('Product deleted', response.json['message'])
+
+    def test_delete_product_non_admin(self):
+        self.client.post('/api/products', json={
+            'name': 'Test Product',
+            'price': 100.0,
+            'description': 'Test Description'
+        })
+        response = self.client.delete('/api/products/1', json={
+            'is_admin': False,
+            'confirm': True
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Only admin can delete products', response.json['error'])
+
+    def test_delete_product_no_confirmation(self):
+        self.client.post('/api/products', json={
+            'name': 'Test Product',
+            'price': 100.0,
+            'description': 'Test Description'
+        })
+        response = self.client.delete('/api/products/1', json={
+            'is_admin': True,
+            'confirm': False
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Deletion confirmation required', response.json['error'])
