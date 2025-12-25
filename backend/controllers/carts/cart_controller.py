@@ -1,85 +1,48 @@
 from flask import Blueprint, request, jsonify
 from backend.services.carts.cart_service import CartService
 from backend.repositories.shopping_cart_repository import ShoppingCartRepository
-from backend.models.user import User
 
 cart_bp = Blueprint('cart', __name__)
 cart_service = CartService(ShoppingCartRepository())
 
-@cart_bp.route('/cart', methods=['POST'])
-def add_to_cart():
-    data = request.get_json()
-    try:
-        user = User(id=data['user_id'], username=data['username'], email=data['email'])
-        product = {'product': data['product'], 'quantity': data['quantity']}
-        cart_service.add_product_to_cart(user, product)
-        return jsonify({"message": "Product added to cart"}), 200
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
-
 @cart_bp.route('/cart', methods=['GET'])
-def view_cart():
+def get_cart():
     user_id = request.args.get('user_id', type=int)
-    username = request.args.get('username')
-    email = request.args.get('email')
+    if user_id is None:
+        return jsonify({"error": "User ID is required"}), 400
     
-    user = User(id=user_id, username=username, email=email)
-    cart = cart_service.view_cart(user)
-    if cart:
-        return jsonify(cart), 200
-    else:
-        return jsonify({"error": "Cart not found"}), 404
+    cart = cart_service.get_or_create_cart(user_id)
+    return jsonify(cart), 200
 
-@cart_bp.route('/cart/checkout', methods=['POST'])
-def checkout():
+@cart_bp.route('/cart/items', methods=['POST'])
+def add_item_to_cart():
     data = request.get_json()
-    try:
-        user = User(id=data['user_id'], username=data['username'], email=data['email'])
-        cart_service.checkout(user)
-        return jsonify({"message": "Checkout successful"}), 200
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+    user_id = data.get('user_id')
+    product_id = data.get('product_id')
+    quantity = data.get('quantity', 1)
 
-@cart_bp.route('/cart/remove', methods=['POST'])
-def remove_from_cart():
-    data = request.get_json()
-    try:
-        user = User(id=data['user_id'], username=data['username'], email=data['email'])
-        product_id = data['product_id']
-        confirm = data['confirm']
-        cart_service.remove_product_from_cart(user, product_id, confirm)
-        return jsonify({"message": "Product removed from cart"}), 200
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+    if user_id is None or product_id is None:
+        return jsonify({"error": "User ID and Product ID are required"}), 400
+    if quantity <= 0:
+        return jsonify({"error": "Quantity must be greater than zero"}), 400
 
-@cart_bp.route('/cart/quantity', methods=['POST'])
-def update_quantity():
-    data = request.get_json()
-    try:
-        user = User(id=data['user_id'], username=data['username'], email=data['email'])
-        product_id = data['product_id']
-        quantity = data['quantity']
-        cart_service.update_quantity(user, product_id, quantity)
-        return jsonify({"message": "Quantity updated"}), 200
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+    cart = cart_service.add_item_to_cart(user_id, product_id, quantity)
+    return jsonify(cart), 200
 
-@cart_bp.route('/cart/save', methods=['POST'])
-def save_cart():
-    data = request.get_json()
-    try:
-        user = User(id=data['user_id'], username=data['username'], email=data['email'])
-        cart_service.save_cart(user)
-        return jsonify({"message": "Cart saved"}), 200
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+@cart_bp.route('/cart/items/<int:product_id>', methods=['DELETE'])
+def remove_item_from_cart(product_id: int):
+    user_id = request.args.get('user_id', type=int)
+    if user_id is None:
+        return jsonify({"error": "User ID is required"}), 400
 
-@cart_bp.route('/cart/load', methods=['POST'])
-def load_cart():
-    data = request.get_json()
-    try:
-        user = User(id=data['user_id'], username=data['username'], email=data['email'])
-        cart_service.load_cart(user)
-        return jsonify({"message": "Cart loaded"}), 200
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+    cart = cart_service.remove_item_from_cart(user_id, product_id)
+    return jsonify(cart), 200
+
+@cart_bp.route('/cart/clear', methods=['POST'])
+def clear_cart():
+    user_id = request.get_json().get('user_id')
+    if user_id is None:
+        return jsonify({"error": "User ID is required"}), 400
+
+    cart_service.clear_cart(user_id)
+    return jsonify({"message": "Cart cleared"}), 200
