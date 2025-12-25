@@ -47,3 +47,15 @@ class ShoppingCartRepository:
         for item in self.carts[user_id]['items']:
             total_price += item['product']['price'] * item['quantity']
         self.carts[user_id]['total_price'] = total_price
+
+    def save_cart(self, user: User) -> None:
+        # Assume `save_cart_to_db` is a function that saves the cart to the database
+        cart = self.get_cart(user)
+        if cart:
+            save_cart_to_db(cart)
+
+    def load_cart(self, user: User) -> None:
+        # Assume `load_cart_from_db` is a function that loads the cart from the database
+        cart = load_cart_from_db(user['id'])
+        if cart:
+            self.carts[user['id']] = cart
