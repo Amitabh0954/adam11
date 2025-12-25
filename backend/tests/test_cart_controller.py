@@ -35,6 +35,18 @@ class CartControllerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('Confirmation required to remove item', response.json['error'])
 
+    def test_update_item_quantity(self):
+        self.client.post('/api/cart/items', json={'user_id': 1, 'product_id': 1, 'quantity': 2})
+        response = self.client.patch('/api/cart/items/1', json={'user_id': 1, 'quantity': 5})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json['cart']['items'][0]['quantity'], 5)
+
+    def test_update_item_quantity_invalid(self):
+        self.client.post('/api/cart/items', json={'user_id': 1, 'product_id': 1, 'quantity': 2})
+        response = self.client.patch('/api/cart/items/1', json={'user_id': 1, 'quantity': 0})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Quantity must be a positive integer', response.json['error'])
+
     def test_clear_cart(self):
         self.client.post('/api/cart/items', json={'user_id': 1, 'product_id': 1, 'quantity': 2})
         response = self.client.post('/api/cart/clear', json={'user_id': 1})
