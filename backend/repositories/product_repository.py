@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from backend.models.product import Product
 
 class ProductRepository:
@@ -25,6 +25,9 @@ class ProductRepository:
             if product['name'] == name:
                 return product
         return None
+
+    def get_all_products(self) -> List[Product]:
+        return list(self.products.values())
 
     def remove_product(self, product_id: int) -> None:
         product = self.products.pop(product_id, None)
