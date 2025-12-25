@@ -39,3 +39,15 @@ def checkout():
         return jsonify({"message": "Checkout successful"}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+@cart_bp.route('/cart/remove', methods=['POST'])
+def remove_from_cart():
+    data = request.get_json()
+    try:
+        user = User(id=data['user_id'], username=data['username'], email=data['email'])
+        product_id = data['product_id']
+        confirm = data['confirm']
+        cart_service.remove_product_from_cart(user, product_id, confirm)
+        return jsonify({"message": "Product removed from cart"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
