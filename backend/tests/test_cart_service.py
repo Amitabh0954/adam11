@@ -30,3 +30,17 @@ class CartServiceTestCase(unittest.TestCase):
         self.cart_service.checkout(self.user)
         cart = self.cart_service.view_cart(self.user)
         self.assertEqual(len(cart['items']), 0)
+
+    def test_remove_product_from_cart(self):
+        cart_item = ShoppingCartItem(product=self.product, quantity=1)
+        self.cart_service.add_product_to_cart(self.user, cart_item)
+        self.cart_service.remove_product_from_cart(self.user, self.product['id'], confirm=True)
+        cart = self.cart_service.view_cart(self.user)
+        self.assertEqual(len(cart['items']), 0)
+        self.assertEqual(cart['total_price'], 0.0)
+
+    def test_remove_product_without_confirmation(self):
+        cart_item = ShoppingCartItem(product=self.product, quantity=1)
+        self.cart_service.add_product_to_cart(self.user, cart_item)
+        with self.assertRaises(ValueError):
+            self.cart_service.remove_product_from_cart(self.user, self.product['id'], confirm=False)
