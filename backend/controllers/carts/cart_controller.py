@@ -47,6 +47,21 @@ def remove_item_from_cart(product_id: int):
     total_price = cart_service.get_cart_total_price(cart)
     return jsonify({"cart": cart, "total_price": total_price}), 200
 
+@cart_bp.route('/cart/items/<int:product_id>', methods=['PATCH'])
+def update_item_quantity(product_id: int):
+    data = request.get_json()
+    user_id = data.get('user_id')
+    quantity = data.get('quantity')
+
+    if user_id is None or quantity is None:
+        return jsonify({"error": "User ID and Quantity are required"}), 400
+    if quantity <= 0:
+        return jsonify({"error": "Quantity must be a positive integer"}), 400
+
+    cart = cart_service.update_item_quantity(user_id, product_id, quantity)
+    total_price = cart_service.get_cart_total_price(cart)
+    return jsonify({"cart": cart, "total_price": total_price}), 200
+
 @cart_bp.route('/cart/clear', methods=['POST'])
 def clear_cart():
     user_id = request.get_json().get('user_id')
