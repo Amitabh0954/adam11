@@ -66,3 +66,16 @@ class CartService:
     def get_cart_total_price(self, cart: ShoppingCart) -> float:
         # Implementation details left abstracted
         return sum(item['quantity'] * self.product_repository.get_product_by_id(item['product_id'])['price'] for item in cart['items'])
+
+    def save_cart_state(self, user_id: int) -> None:
+        cart = self.cart_repository.get_cart_by_user_id(user_id)
+        if not cart:
+            raise ValueError("Cart not found")
+        # Persist cart state (implementation abstracted)
+
+    def load_cart_state(self, user_id: int) -> ShoppingCart:
+        # Load cart state (implementation abstracted)
+        cart = self.cart_repository.get_cart_by_user_id(user_id)
+        if not cart:
+            cart = self.cart_repository.create_cart(user_id)
+        return cart
