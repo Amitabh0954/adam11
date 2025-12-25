@@ -1,39 +1,46 @@
 import unittest
-from backend.repositories.password_reset_repository import PasswordResetRepository
 from backend.repositories.user_repository import UserRepository
-from backend.services.password_reset_service import PasswordResetService
+from backend.repositories.password_reset_repository import PasswordResetRepository
+from backend.services.users.password_reset_service import PasswordResetService
 
 class PasswordResetServiceTestCase(unittest.TestCase):
     def setUp(self):
-        self.password_reset_repository = PasswordResetRepository()
         self.user_repository = UserRepository()
+        self.reset_repository = PasswordResetRepository()
+        self.reset_service = PasswordResetService(self.user_repository, self.reset_repository)
+
         self.user_repository.add_user({
             'id': 1,
+            'username': 'testuser',
             'email': 'test@example.com',
-            'password': 'Password1'
+            'password': 'Password123'
         })
-        self.password_reset_service = PasswordResetService(self.password_reset_repository, self.user_repository)
 
-    def test_create_password_reset_success(self):
-        password_reset = self.password_reset_service.create_password_reset(email='test@example.com')
-        self.assertIn('token', password_reset)
-        self.assertEqual(password_reset['user_id'], 1)
+    def test_initiate_password_reset(self):
+        self.reset_service.initiate_password_reset(email='test@example.com')
+        reset_requests = list(self.reset_repository.reset_requests.values())
+        self.assertEqual(len(reset_requests), 1)
+        self.assertEqual(reset_requests[0]['user_id'], 1)
 
-    def test_create_password_reset_user_not_found(self):
+    def test_initiate_password_reset_nonexistent_email(self):
         with self.assertRaises(ValueError):
-            self.password_reset_service.create_password_reset(email='nonexistent@example.com')
+            self.reset_service.initiate_password_reset(email='nonexistent@example.com')
 
-    def test_validate_password_reset(self):
-        password_reset = self.password_reset_service.create_password_reset(email='test@example.com')
-        is_valid = self.password_reset_service.validate_password_reset(password_reset['token'])
-        self.assertTrue(is_valid)
-
-    def test_use_password_reset_success(self):
-        password_reset = self.password_reset_service.create_password_reset(email='test@example.com')
-        self.password_reset_service.use_password_reset(token=password_reset['token'], new_password='NewPassword1')
+    def test_reset_password_success(self):
+        self.reset_service.initiate_password_reset(email='test@example.com')
+        reset_requests = list(self.reset_repository.reset_requests.values())
+        reset_request = reset_requests[0]
+        self.reset_service.reset_password(token=reset_request['token'], new_password='NewPassword123')
         user = self.user_repository.get_user_by_id(1)
-        self.assertEqual(user['password'], 'NewPassword1')
+        self.assertEqual(user['password'], 'NewPassword123')
 
-    def test_use_password_reset_invalid_token(self):
+    def test_reset_password_invalid_token(self):
         with self.assertRaises(ValueError):
-            self.password_reset_service.use_password_reset(token='invalidtoken', new_password='NewPassword1')
+            self.reset_service.reset_password(token='invalidtoken', new_password='NewPassword123')
+
+    def test_reset_password_insecure_password(self):
+        self.reset_service.initiate_password_reset(email='test@example.com')
+        reset_requests = list(self.reset_repository.reset_requests.values())
+        reset_request = reset_requests[0]
+        with self.assertRaises(ValueError):
+            self.reset_service.reset_password(token=reset_request['token'], new_password='short')
