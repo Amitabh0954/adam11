@@ -21,6 +21,12 @@ class UserService:
         self.user_repository.add_user(user)
         return user
 
+    def authenticate_user(self, email: str, password: str) -> User:
+        user = self.user_repository.get_user_by_email(email)
+        if user and user['password'] == password:  # Assume password hash check
+            return user
+        raise ValueError("Invalid email or password")
+
     def is_valid_email(self, email: str) -> bool:
         email_regex = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$'
         return re.match(email_regex, email) is not None
