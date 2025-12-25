@@ -1,12 +1,10 @@
 from typing import TypedDict, List
-from backend.models.product import Product
-from backend.models.user import User
 
-class ShoppingCartItem(TypedDict):
-    product: Product
+class CartItem(TypedDict):
+    product_id: int
     quantity: int
 
 class ShoppingCart(TypedDict):
-    user: User
-    items: List[ShoppingCartItem]
-    total_price: float
+    id: int
+    user_id: int
+    items: List[CartItem]
