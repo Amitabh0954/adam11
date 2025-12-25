@@ -9,3 +9,4 @@ class ShoppingCartItem(TypedDict):
 class ShoppingCart(TypedDict):
     user: User
     items: List[ShoppingCartItem]
+    total_price: float
