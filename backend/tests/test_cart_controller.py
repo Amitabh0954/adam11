@@ -50,3 +50,39 @@ class CartControllerTestCase(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertIn('Checkout successful', response.json['message'])
+
+    def test_remove_from_cart(self):
+        self.client.post('/api/cart', json={
+            'user_id': 1,
+            'username': 'testuser',
+            'email': 'test@example.com',
+            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
+            'quantity': 1
+        })
+        response = self.client.post('/api/cart/remove', json={
+            'user_id': 1,
+            'username': 'testuser',
+            'email': 'test@example.com',
+            'product_id': 1,
+            'confirm': True
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Product removed from cart', response.json['message'])
+
+    def test_remove_from_cart_without_confirmation(self):
+        self.client.post('/api/cart', json={
+            'user_id': 1,
+            'username': 'testuser',
+            'email': 'test@example.com',
+            'product': {'id': 1, 'name': 'Product1', 'price': 100.0, 'description': 'Description1'},
+            'quantity': 1
+        })
+        response = self.client.post('/api/cart/remove', json={
+            'user_id': 1,
+            'username': 'testuser',
+            'email': 'test@example.com',
+            'product_id': 1,
+            'confirm': False
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Remove confirmation required', response.json['error'])
