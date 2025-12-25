@@ -51,3 +51,15 @@ def remove_from_cart():
         return jsonify({"message": "Product removed from cart"}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+@cart_bp.route('/cart/quantity', methods=['POST'])
+def update_quantity():
+    data = request.get_json()
+    try:
+        user = User(id=data['user_id'], username=data['username'], email=data['email'])
+        product_id = data['product_id']
+        quantity = data['quantity']
+        cart_service.update_quantity(user, product_id, quantity)
+        return jsonify({"message": "Quantity updated"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
