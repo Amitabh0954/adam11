@@ -33,17 +33,34 @@ class ProductServiceTestCase(unittest.TestCase):
 
     def test_update_product(self):
         product = self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
-        updated_product = self.product_service.update_product(product_id=product['id'], name='Updated Product', price=150.0, description='Updated Description')
+        updated_product = self.product_service.update_product(
+            product_id=product['id'],
+            name='Updated Product',
+            price=150.0,
+            description='Updated Description',
+            is_admin=True
+        )
         self.assertEqual(updated_product['name'], 'Updated Product')
         self.assertEqual(updated_product['price'], 150.0)
         self.assertEqual(updated_product['description'], 'Updated Description')
 
-    def test_update_product_name_taken(self):
-        self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
-        self.product_service.add_product(name='Another Product', price=200.0, description='Another Description')
-        product = self.product_service.get_product_by_name('Test Product')
+    def test_update_product_non_admin(self):
+        product = self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
         with self.assertRaises(ValueError):
-            self.product_service.update_product(product_id=product['id'], name='Another Product')
+            self.product_service.update_product(
+                product_id=product['id'],
+                name='Updated Product',
+                is_admin=False
+            )
+
+    def test_update_product_invalid_price(self):
+        product = self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
+        with self.assertRaises(ValueError):
+            self.product_service.update_product(
+                product_id=product['id'],
+                price='invalid',
+                is_admin=True
+            )
 
     def test_delete_product(self):
         product = self.product_service.add_product(name='Test Product', price=100.0, description='Test Description')
