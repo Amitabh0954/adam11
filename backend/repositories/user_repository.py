@@ -1,22 +1,19 @@
-from typing import Optional
-from backend.models.user import User
+from models.user import User
 
 class UserRepository:
     def __init__(self):
-        self.users = {}
-        self.email_index = set()
-
-    def add_user(self, user: User) -> None:
-        if user['email'] in self.email_index:
-            raise ValueError("Email must be unique")
-        self.users[user['id']] = user
-        self.email_index.add(user['email'])
-
-    def get_user_by_id(self, user_id: int) -> Optional[User]:
-        return self.users.get(user_id)
-
-    def get_user_by_email(self, email: str) -> Optional[User]:
-        for user in self.users.values():
-            if user['email'] == email:
-                return user
-        return None
+        self.users = []
+    
+    def find_by_email(self, email: str) -> User:
+        return next((user for user in self.users if user.email == email), None)
+    
+    def find_by_reset_token(self, token: str) -> User:
+        return next((user for user in self.users if user.reset_token == token), None)
+    
+    def save(self, user: User) -> None:
+        self.users.append(user)
+    
+    def update(self, user: User) -> None:
+        index = next((i for i, u in enumerate(self.users) if u.email == user.email), None)
+        if index is not None:
+            self.users[index] = user
