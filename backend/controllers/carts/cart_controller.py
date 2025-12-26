@@ -24,6 +24,18 @@ def get_cart_items():
     response = cart_service.get_cart_items(user_id)
     return jsonify(response), response['status']
 
+@cart_controller.route('/carts/save', methods=['POST'])
+def save_cart():
+    user_id = request.headers.get('User-ID')
+    response = cart_service.save_cart(user_id)
+    return jsonify(response), response['status']
+
+@cart_controller.route('/carts/retrieve', methods=['GET'])
+def retrieve_cart():
+    user_id = request.headers.get('User-ID')
+    response = cart_service.retrieve_cart(user_id)
+    return jsonify(response), response['status']
+
 @cart_controller.route('/carts/<int:item_id>', methods=['PUT'])
 def update_cart_item_quantity(item_id: int):
     data = request.get_json()
