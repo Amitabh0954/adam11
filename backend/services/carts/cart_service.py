@@ -1,3 +1,3 @@
 from repositories.cart_repository import CartRepository
 from repositories.product_repository import ProductRepository
-from models.cart_item
+from models.cart_item import Cart
