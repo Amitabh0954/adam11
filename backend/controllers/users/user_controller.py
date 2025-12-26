@@ -9,3 +9,9 @@ def register():
     data = request.get_json()
     response = user_service.register_user(data)
     return jsonify(response), response['status']
+
+@user_controller.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    response = user_service.login_user(data)
+    return jsonify(response), response['status']
