@@ -46,3 +46,11 @@ class ProductService:
 
         self.product_repository.update(product)
         return {"message": "Product updated successfully", "status": 200}
+    
+    def delete_product(self, product_id: int):
+        product = self.product_repository.find_by_id(product_id)
+        if not product:
+            return {"message": "Product not found", "status": 404}
+        
+        self.product_repository.delete(product)
+        return {"message": "Product deleted successfully", "status": 200}
