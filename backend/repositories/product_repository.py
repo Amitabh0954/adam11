@@ -22,5 +22,10 @@ class ProductRepository:
         product.is_deleted = True  # Soft delete the product
         self.update(product)
     
-    def search(self, query: str) -> list[Product]:
-        return [product for product in self.products if query.lower() in product.name.lower() and not product.is_deleted]
+    def search(self, query: str, category: str = None, attributes: list = []) -> list[Product]:
+        results = [product for product in self.products if query.lower() in product.name.lower() and not product.is_deleted]
+        if category:
+            results = [product for product in results if product.category_id == category]
+        if attributes:
+            results = [product for product in results if any(attr in product.attributes for attr in attributes)]
+        return results
