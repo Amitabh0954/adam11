@@ -82,3 +82,17 @@ class UserService:
         self.user_repository.update(user)
         
         return {"message": "Password has been reset successfully", "status": 200}
+
+    def update_profile(self, data: dict):
+        email = data.get('email')
+        user = self.user_repository.find_by_email(email)
+        if not user:
+            return {"message": "User not found", "status": 404}
+        
+        if 'new_email' in data:
+            user.email = data['new_email']
+        if 'password' in data:
+            user.password = generate_password_hash(data['password'])
+
+        self.user_repository.update(user)
+        return {"message": "Profile updated successfully", "status": 200}
