@@ -9,8 +9,9 @@ class ProductService:
         name = data.get('name')
         price = data.get('price')
         description = data.get('description')
-        if not name or price is None or not description:
-            return {"message": "Name, Price, and Description are required", "status": 400}
+        category_id = data.get('category_id')
+        if not name or price is None or not description or category_id is None:
+            return {"message": "Name, Price, Description, and Category are required", "status": 400}
         
         if price <= 0:
             return {"message": "Price must be a positive number", "status": 400}
@@ -19,7 +20,7 @@ class ProductService:
         if existing_product:
             return {"message": "Product with this name already exists", "status": 400}
         
-        product = Product(name=name, price=price, description=description)
+        product = Product(name=name, price=price, description=description, category_id=category_id)
         self.product_repository.save(product)
         
         return {"message": "Product added successfully", "status": 201}
@@ -44,6 +45,9 @@ class ProductService:
         if 'description' in data:
             product.description = data['description']
 
+        if 'category_id' in data:
+            product.category_id = data['category_id']
+
         self.product_repository.update(product)
         return {"message": "Product updated successfully", "status": 200}
     
@@ -62,7 +66,7 @@ class ProductService:
         end = start + per_page
         results = products[start:end]
         return {
-            "results": [{"id": p.id, "name": p.name, "price": p.price, "description": p.description} for p in results],
+            "results": [{"id": p.id, "name": p.name, "price": p.price, "description": p.description, "category_id": p.category_id} for p in results],
             "page": page,
             "per_page": per_page,
             "total": total,
