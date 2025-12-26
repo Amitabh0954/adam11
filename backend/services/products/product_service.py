@@ -64,16 +64,16 @@ class ProductService:
         self.product_repository.update(product)
         return {"message": "Product updated successfully", "status": 200}
     
-    def delete_product(self, product_id: int):
+    def delete_product(self, product_id: int, confirm: bool, authorization: str):
+        if authorization != "admin":
+            return {"message": "Unauthorized. Only admin can delete products.", "status": 403}
+
+        if not confirm:
+            return {"message": "Deletion requires confirmation. Set confirm to true.", "status": 400}
+
         product = self.product_repository.find_by_id(product_id)
         if not product:
             return {"message": "Product not found", "status": 404}
         
         self.product_repository.delete(product)
-        return {"message": "Product deleted successfully", "status": 200}
-    
-    def search_products(self, query: str, category: str = None, attributes: list = [], page: int = 1, per_page: int = 10):
-        products = self.product_repository.search(query, category, attributes)
-        total = len(products)
-        start = (page - 1) * per_page
-        end =
+        return {"message
