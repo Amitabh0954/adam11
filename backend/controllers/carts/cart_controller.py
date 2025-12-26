@@ -19,3 +19,8 @@ def get_cart(cart_id: int):
 def clear_cart(cart_id: int):
     response = cart_service.clear_cart(cart_id)
     return jsonify(response), response['status']
+
+@cart_controller.route('/carts/<int:cart_id>/items/<int:product_id>', methods=['DELETE'])
+def remove_from_cart(cart_id: int, product_id: int):
+    response = cart_service.remove_from_cart(cart_id, product_id)
+    return jsonify(response), response['status']
