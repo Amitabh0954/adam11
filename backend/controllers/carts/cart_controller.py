@@ -12,7 +12,8 @@ def add_product_to_cart():
 
 @cart_controller.route('/carts/<int:item_id>', methods=['DELETE'])
 def remove_product_from_cart(item_id: int):
-    response = cart_service.remove_product_from_cart(item_id)
+    confirm = request.args.get('confirm', False, type=bool)
+    response = cart_service.remove_product_from_cart(item_id, confirm)
     return jsonify(response), response['status']
 
 @cart_controller.route('/carts', methods=['GET'])
