@@ -17,3 +17,6 @@ class ProductRepository:
         index = next((i for i, p in enumerate(self.products) if p.id == product.id), None)
         if index is not None:
             self.products[index] = product
+    
+    def delete(self, product: Product) -> None:
+        self.products.remove(product)
