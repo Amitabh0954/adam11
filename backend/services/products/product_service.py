@@ -21,12 +21,15 @@ class ProductService:
         if existing_product:
             return {"message": "Product with this name already exists", "status": 400}
         
-        product = Product(name=name, price=price, description=description, category_id=category_id, attributes=attributes)
+        product = Product(name=name, price=price, description=description, category_id=category_id, attributes=attributes, updated_by=data.get('updated_by'))
         self.product_repository.save(product)
         
         return {"message": "Product added successfully", "status": 201}
     
-    def update_product(self, product_id: int, data: dict):
+    def update_product(self, product_id: int, data: dict, authorization: str):
+        if authorization != "admin":
+            return {"message": "Unauthorized. Only admin can update products.", "status": 403}
+
         product = self.product_repository.find_by_id(product_id)
         if not product:
             return {"message": "Product not found", "status": 404}
@@ -38,12 +41,17 @@ class ProductService:
             product.name = data['name']
         
         if 'price' in data:
-            price = data['price']
-            if price <= 0:
-                return {"message": "Price must be a positive number", "status": 400}
+            try:
+                price = float(data['price'])
+                if price <= 0:
+                    return {"message": "Price must be a positive number", "status": 400}
+            except ValueError:
+                return {"message": "Price must be a numeric value", "status": 400}
             product.price = price
         
         if 'description' in data:
+            if not data['description']:
+                return {"message": "Description cannot be empty", "status": 400}
             product.description = data['description']
 
         if 'category_id' in data:
@@ -52,6 +60,7 @@ class ProductService:
         if 'attributes' in data:
             product.attributes = data['attributes']
 
+        product.updated_by = authorization
         self.product_repository.update(product)
         return {"message": "Product updated successfully", "status": 200}
     
@@ -67,12 +76,4 @@ class ProductService:
         products = self.product_repository.search(query, category, attributes)
         total = len(products)
         start = (page - 1) * per_page
-        end = start + per_page
-        results = products[start:end]
-        return {
-            "results": [{"id": p.id, "name": p.name, "price": p.price, "description": p.description, "category_id": p.category_id, "attributes": p.attributes} for p in results],
-            "page": page,
-            "per_page": per_page,
-            "total": total,
-            "status": 200
-        }
+        end =
