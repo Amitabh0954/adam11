@@ -15,3 +15,8 @@ def update_product(product_id: int):
     data = request.get_json()
     response = product_service.update_product(product_id, data)
     return jsonify(response), response['status']
+
+@product_controller.route('/products/<int:product_id>', methods=['DELETE'])
+def delete_product(product_id: int):
+    response = product_service.delete_product(product_id)
+    return jsonify(response), response['status']
