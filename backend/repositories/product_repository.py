@@ -20,7 +20,7 @@ class ProductRepository:
     
     def delete(self, product: Product) -> None:
         product.is_deleted = True  # Soft delete the product
-        self.update(product)
+        update(product)
     
     def search(self, query: str, category: str = None, attributes: list = []) -> list[Product]:
         results = [product for product in self.products if query.lower() in product.name.lower() and not product.is_deleted]
