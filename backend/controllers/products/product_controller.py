@@ -13,7 +13,7 @@ def add_product():
 @product_controller.route('/products/<int:product_id>', methods=['PUT'])
 def update_product(product_id: int):
     data = request.get_json()
-    response = product_service.update_product(product_id, data)
+    response = product_service.update_product(product_id, data, request.headers.get('Authorization'))
     return jsonify(response), response['status']
 
 @product_controller.route('/products/<int:product_id>', methods=['DELETE'])
