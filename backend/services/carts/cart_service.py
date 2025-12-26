@@ -52,9 +52,4 @@ class CartService:
         cart_item.quantity = quantity
         self.cart_repository.update(cart_item)
         updated_price = self.calculate_total_price(user_id)
-        return {"message": "Cart item quantity updated", "total_price": updated_price, "status": 200}
-    
-    def calculate_total_price(self, user_id: int):
-        cart_items = self.cart_repository.find_by_user_id(user_id)
-        products = [self.product_repository.find_by_id(item.product_id) for item in cart_items]
-        return sum(item.quantity * product.price for item, product in zip(cart_items, products))
+        return {"message": "Cart item quantity updated", "total_price": updated_price
