@@ -54,3 +54,17 @@ class ProductService:
         
         self.product_repository.delete(product)
         return {"message": "Product deleted successfully", "status": 200}
+    
+    def search_products(self, query: str, page: int, per_page: int):
+        products = self.product_repository.search(query)
+        total = len(products)
+        start = (page - 1) * per_page
+        end = start + per_page
+        results = products[start:end]
+        return {
+            "results": [{"id": p.id, "name": p.name, "price": p.price, "description": p.description} for p in results],
+            "page": page,
+            "per_page": per_page,
+            "total": total,
+            "status": 200
+        }
