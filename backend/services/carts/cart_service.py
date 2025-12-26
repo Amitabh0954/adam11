@@ -13,6 +13,9 @@ class CartService:
         if not user_id or not product_id:
             return {"message": "User ID and Product ID are required", "status": 400}
         
+        if quantity <= 0:
+            return {"message": "Quantity must be a positive integer", "status": 400}
+
         cart = self.cart_repository.find_or_create_by_user_id(user_id)
         if not cart:
             cart = Cart(user_id=user_id)
@@ -53,3 +56,21 @@ class CartService:
         cart.items = [item for item in cart.items if item.product_id != product_id]
         self.cart_repository.update(cart)
         return {"message": "Product removed from cart successfully", "status": 200}
+
+    def update_cart_quantity(self, cart_id: int, product_id: int, quantity: int):
+        if quantity <= 0:
+            return {"message": "Quantity must be a positive integer", "status": 400}
+
+        cart = self.cart_repository.find_by_id(cart_id)
+        if not cart:
+            return {"message": "Cart not found", "status": 404}
+
+        for item in cart.items:
+            if item.product_id == product_id:
+                item.quantity = quantity
+                break
+        else:
+            return {"message": "Product not found in cart", "status": 404}
+
+        self.cart_repository.update(cart)
+        return {"message": "Product quantity updated successfully", "status": 200}
