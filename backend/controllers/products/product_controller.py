@@ -24,7 +24,9 @@ def delete_product(product_id: int):
 @product_controller.route('/products/search', methods=['GET'])
 def search_products():
     query = request.args.get('query', '')
+    category = request.args.get('category')
+    attributes = request.args.getlist('attributes')
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 10))
-    response = product_service.search_products(query, page, per_page)
+    response = product_service.search_products(query, category, attributes, page, per_page)
     return jsonify(response), response['status']
