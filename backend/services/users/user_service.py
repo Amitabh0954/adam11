@@ -99,15 +99,21 @@ class UserService:
         if not user:
             return {"message": "User not found", "status": 404}
         
+        update_fields = False
         if 'new_email' in data:
             user.email = data['new_email']
+            update_fields = True
         if 'password' in data:
             if not self.is_password_secure(data['password']):
                 return {"message": "Password does not meet security criteria", "status": 400}
             user.password = generate_password_hash(data['password'])
+            update_fields = True
 
-        self.user_repository.update(user)
-        return {"message": "Profile updated successfully", "status": 200}
+        if update_fields:
+            self.user_repository.update(user)
+            return {"message": "Profile updated successfully", "status": 200}
+
+        return {"message": "No updates made to profile", "status": 200}
 
     @staticmethod
     def is_password_secure(password: str) -> bool:
