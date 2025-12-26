@@ -1,0 +1,12 @@
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    login_attempts INTEGER NOT NULL DEFAULT 0,
+    is_locked BOOLEAN NOT NULL DEFAULT 0,
+    last_login_at TIMESTAMP,
+    reset_token TEXT,
+    reset_token_expiry TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
