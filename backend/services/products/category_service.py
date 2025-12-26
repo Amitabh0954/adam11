@@ -1,27 +1,16 @@
-from typing import Optional, List
-from backend.models.category import Category
-from backend.repositories.category_repository import CategoryRepository
+from repositories.category_repository import CategoryRepository
+from models.category import Category
 
 class CategoryService:
-    def __init__(self, category_repository: CategoryRepository):
-        self.category_repository = category_repository
-
-    def add_category(self, name: str, parent_id: Optional[int] = None) -> Category:
-        category = Category(
-            id=len(self.category_repository.categories) + 1,
-            name=name,
-            parent_id=parent_id
-        )
-        self.category_repository.add_category(category)
-        return category
-
-    def get_category(self, category_id: int) -> Optional<Category]:
-        return self.category_repository.get_category_by_id(category_id)
-
-    def get_all_categories(self) -> List<Category]:
-        return self.category_repository.get_all_categories()
-
-    def remove_category(self, category_id: int) -> None:
-        if not self.category_repository.get_category_by_id(category_id):
-            raise ValueError("Category not found")
-        self.category_repository.remove_category(category_id)
+    def __init__(self):
+        self.category_repository = CategoryRepository()
+    
+    def add_category(self, data: dict):
+        name = data.get('name')
+        parent_id = data.get('parent_id')
+        if not name:
+            return {"message": "Name is required", "status": 400}
+        
+        existing_category = self.category_repository.find_by_name(name)
+        if existing_category:
+            return {"message":
