@@ -9,3 +9,8 @@ class UserRepository:
     
     def save(self, user: User) -> None:
         self.users.append(user)
+    
+    def update(self, user: User) -> None:
+        index = next((i for i, u in enumerate(self.users) if u.email == user.email), None)
+        if index is not None:
+            self.users[index] = user
