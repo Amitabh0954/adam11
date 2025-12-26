@@ -17,6 +17,7 @@ CREATE TABLE products (
     price REAL NOT NULL CHECK (price > 0),
     description TEXT NOT NULL,
     category_id INTEGER NOT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
