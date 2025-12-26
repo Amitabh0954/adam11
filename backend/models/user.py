@@ -1,6 +1,9 @@
-from typing import TypedDict
+from datetime import datetime
+from werkzeug.security import generate_password_hash
 
-class User(TypedDict):
-    id: int
-    username: str
-    email: str
+class User:
+    def __init__(self, email: str, password: str):
+        self.email = email
+        self.password = generate_password_hash(password)
+        self.created_at = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
