@@ -1,7 +1,8 @@
 from models.user import User
 from repositories.user_repository import UserRepository
 from datetime import datetime, timedelta
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
+import uuid
 
 class UserService:
     def __init__(self):
@@ -48,3 +49,36 @@ class UserService:
         
         session_expiry = datetime.utcnow() + timedelta(seconds=Config.SESSION_TIMEOUT)
         return {"message": "Login successful", "session_expiry": session_expiry.isoformat(), "status": 200}
+    
+    def request_password_reset(self, data: dict):
+        email = data.get('email')
+        if not email:
+            return {"message": "Email is required", "status": 400}
+        
+        user = self.user_repository.find_by_email(email)
+        if not user:
+            return {"message": "Invalid email", "status": 400}
+        
+        reset_token = str(uuid.uuid4())
+        user.reset_token = reset_token
+        user.reset_token_expiry = datetime.utcnow() + timedelta(seconds=Config.RESET_TOKEN_EXPIRY)
+        self.user_repository.update(user)
+        
+        # Here, send an email with the token (omitted for brevity)
+        return {"message": "Password reset link has been sent to your email", "status": 200}
+    
+    def reset_password(self, data: dict, token: str):
+        password = data.get('password')
+        if not password:
+            return {"message": "Password is required", "status": 400}
+        
+        user = self.user_repository.find_by_reset_token(token)
+        if not user or user.reset_token_expiry < datetime.utcnow():
+            return {"message": "Invalid or expired reset token", "status": 400}
+        
+        user.password = generate_password_hash(password)
+        user.reset_token = None
+        user.reset_token_expiry = None
+        self.user_repository.update(user)
+        
+        return {"message": "Password has been reset successfully", "status": 200}
