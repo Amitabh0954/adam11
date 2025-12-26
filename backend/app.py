@@ -1,13 +1,13 @@
 from flask import Flask
 from configurations.config import Config
-from controllers.users import user_controller
-from controllers.products import product_controller
-from controllers.carts import cart_controller
-from controllers.orders import order_controller
-from controllers.reviews import review_controller
-from controllers.promotions import promotion_controller
-from controllers.analytics import analytics_controller
-from controllers.support import support_controller
+from controllers.users.user_controller import user_controller
+from controllers.products.product_controller import product_controller
+from controllers.carts.cart_controller import cart_controller
+from controllers.orders.order_controller import order_controller
+from controllers.reviews.review_controller import review_controller
+from controllers.promotions.promotion_controller import promotion_controller
+from controllers.analytics.analytics_controller import analytics_controller
+from controllers.support.support_controller import support_controller
 
 def create_app() -> Flask:
     app = Flask(__name__)
