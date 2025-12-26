@@ -1,25 +1,22 @@
-from typing import Optional, List
-from backend.models.category import Category
+from models.category import Category
 
 class CategoryRepository:
     def __init__(self):
-        self.categories = {}
-        self.name_index = set()
-
-    def add_category(self, category: Category) -> None:
-        if category['name'] in self.name_index:
-            raise ValueError("Category name must be unique")
+        self.categories = []
     
-        self.categories[category['id']] = category
-        self.name_index.add(category['name'])
+    def find_by_name(self, name: str) -> Category:
+        return next((category for category in self.categories if category.name == name), None)
+    
+    def find_by_id(self, category_id: int) -> Category:
+        return next((category for category in self.categories if category.id == category_id), None)
 
-    def get_category_by_id(self, category_id: int) -> Optional<Category]:
-        return self.categories.get(category_id)
-
-    def get_all_categories(self) -> List[Category]:
-        return list(self.categories.values())
-
-    def remove_category(self, category_id: int) -> None:
-        category = self.categories.pop(category_id, None)
-        if category:
-            self.name_index.remove(category['name'])
+    def save(self, category: Category) -> None:
+        self.categories.append(category)
+    
+    def update(self, category: Category) -> None:
+        index = next((i for i, c in enumerate(self.categories) if c.id == category.id), None)
+        if index is not None:
+            self.categories[index] = category
+    
+    def delete(self, category: Category) -> None:
+        self.categories.remove(category)
