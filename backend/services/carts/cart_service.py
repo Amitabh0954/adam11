@@ -1,29 +1,15 @@
-from typing import Optional
-from backend.models.user import User
-from backend.models.shopping_cart import ShoppingCart, ShoppingCartItem
-from backend.repositories.shopping_cart_repository import ShoppingCartRepository
+from repositories.cart_repository import CartRepository
+from models.cart_item import CartItem
 
 class CartService:
-    def __init__(self, cart_repository: ShoppingCartRepository):
-        self.cart_repository = cart_repository
-
-    def add_product_to_cart(self, user: User, product: ShoppingCartItem) -> None:
-        self.cart_repository.add_item(user, product)
-
-    def view_cart(self, user: User) -> Optional[ShoppingCart]:
-        return self.cart_repository.get_cart(user)
-
-    def checkout(self, user: User) -> None:
-        self.cart_repository.clear_cart(user)
-
-    def remove_product_from_cart(self, user: User, product_id: int, confirm: bool) -> None:
-        self.cart_repository.remove_item(user, product_id, confirm)
-
-    def update_quantity(self, user: User, product_id: int, quantity: int) -> None:
-        self.cart_repository.update_quantity(user, product_id, quantity)
-
-    def save_cart(self, user: User) -> None:
-        self.cart_repository.save_cart(user)
-
-    def load_cart(self, user: User) -> None:
-        self.cart_repository.load_cart(user)
+    def __init__(self):
+        self.cart_repository = CartRepository()
+    
+    def add_product_to_cart(self, data: dict):
+        user_id = data.get('user_id')
+        product_id = data.get('product_id')
+        quantity = data.get('quantity')
+        if user_id is None or product_id is None or quantity is None:
+            return {"message": "User ID, Product ID, and Quantity are required", "status": 400}
+        
+        cart_item = CartItem(user_id=user
