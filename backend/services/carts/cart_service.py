@@ -44,3 +44,12 @@ class CartService:
         cart.items = []
         self.cart_repository.update(cart)
         return {"message": "Cart cleared successfully", "status": 200}
+    
+    def remove_from_cart(self, cart_id: int, product_id: int):
+        cart = self.cart_repository.find_by_id(cart_id)
+        if not cart:
+            return {"message": "Cart not found", "status": 404}
+        
+        cart.items = [item for item in cart.items if item.product_id != product_id]
+        self.cart_repository.update(cart)
+        return {"message": "Product removed from cart successfully", "status": 200}
