@@ -20,3 +20,7 @@ class ProductRepository:
     
     def delete(self, product: Product) -> None:
         self.products.remove(product)
+    
+    def search(self, query: str) -> list[Product]:
+        query = query.lower()
+        return [product for product in self.products if query in product.name.lower() or query in product.description.lower()]
