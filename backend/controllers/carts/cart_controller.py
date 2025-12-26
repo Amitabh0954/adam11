@@ -20,3 +20,9 @@ def remove_product_from_cart(item_id: int):
 def get_cart_items():
     response = cart_service.get_cart_items()
     return jsonify(response), response['status']
+
+@cart_controller.route('/carts/<int:item_id>', methods=['PUT'])
+def update_cart_item_quantity(item_id: int):
+    data = request.get_json()
+    response = cart_service.update_cart_item_quantity(item_id, data)
+    return jsonify(response), response['status']
