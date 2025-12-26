@@ -14,7 +14,7 @@ class CartRepository:
         self.cart_items.append(cart_item)
     
     def update(self, cart_item: CartItem) -> None:
-        index = next((i for i, item in enumerate(self.cart_items) if item.id == cart_item.id), None)
+        index = next((i, item for i, item in enumerate(self.cart_items) if item.id == cart_item.id), None)
         if index is not None:
             self.cart_items[index] = cart_item
     
