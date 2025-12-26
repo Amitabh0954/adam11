@@ -18,7 +18,8 @@ def remove_product_from_cart(item_id: int):
 
 @cart_controller.route('/carts', methods=['GET'])
 def get_cart_items():
-    response = cart_service.get_cart_items()
+    user_id = request.args.get('user_id')
+    response = cart_service.get_cart_items(user_id)
     return jsonify(response), response['status']
 
 @cart_controller.route('/carts/<int:item_id>', methods=['PUT'])
