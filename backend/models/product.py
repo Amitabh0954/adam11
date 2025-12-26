@@ -5,3 +5,4 @@ class Product:
         self.price = price
         self.description = description
         self.category_id = category_id
+        self.is_deleted = False  # To mark if the product is deleted
