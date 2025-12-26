@@ -5,7 +5,7 @@ class ProductRepository:
         self.products = []
     
     def find_by_name(self, name: str) -> Product:
-        return next((product for product in self.products if product.name == name), None)
+        return next((product for product in self.products if product.name == name and not product.is_deleted), None)
     
     def find_by_id(self, product_id: int) -> Product:
         return next((product for product in self.products if product.id == product_id and not product.is_deleted), None)
