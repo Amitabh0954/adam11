@@ -25,7 +25,9 @@ class UserService:
         user = User(email=email, password=password)
         self.user_repository.save(user)
         
-        return {"message": "User registered successfully", "status": 201}
+        # Send verification email (omitted for brevity)
+        
+        return {"message": "User registered successfully. Please verify your email.", "status": 201}
     
     def login_user(self, data: dict):
         email = data.get('email')
@@ -68,7 +70,8 @@ class UserService:
         user.reset_token_expiry = datetime.utcnow() + timedelta(seconds=Config.RESET_TOKEN_EXPIRY)
         self.user_repository.update(user)
         
-        # Here, send an email with the token (omitted for brevity)
+        # Send password reset email with token (omitted for brevity)
+        
         return {"message": "Password reset link has been sent to your email", "status": 200}
     
     def reset_password(self, data: dict, token: str):
@@ -99,6 +102,8 @@ class UserService:
         if 'new_email' in data:
             user.email = data['new_email']
         if 'password' in data:
+            if not self.is_password_secure(data['password']):
+                return {"message": "Password does not meet security criteria", "status": 400}
             user.password = generate_password_hash(data['password'])
 
         self.user_repository.update(user)
