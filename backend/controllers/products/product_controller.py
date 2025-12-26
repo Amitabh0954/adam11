@@ -20,3 +20,11 @@ def update_product(product_id: int):
 def delete_product(product_id: int):
     response = product_service.delete_product(product_id)
     return jsonify(response), response['status']
+
+@product_controller.route('/products/search', methods=['GET'])
+def search_products():
+    query = request.args.get('query', '')
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+    response = product_service.search_products(query, page, per_page)
+    return jsonify(response), response['status']
