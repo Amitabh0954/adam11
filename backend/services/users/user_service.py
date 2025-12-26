@@ -123,7 +123,7 @@ class UserService:
             return False
         if not any char.isupper() for char in password):
             return False
-        if not any char.islower() for char in password):
+        if not any char is lower() for char in password):
             return False
         if not any char in "!@#$%^&*()_+-=[]{}|;:'\",.<>?/" for char in password):
             return False
