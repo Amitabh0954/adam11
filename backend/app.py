@@ -2,7 +2,7 @@ from flask import Flask
 from configurations.config import Config
 from controllers.users import user_controller
 from controllers.products import product_controller
-from controllers.categories import category_controller
+from controllers.carts import cart_controller
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -11,7 +11,7 @@ def create_app() -> Flask:
     with app.app_context():
         app.register_blueprint(user_controller)
         app.register_blueprint(product_controller)
-        app.register_blueprint(category_controller)
+        app.register_blueprint(cart_controller)
     
     return app
 
