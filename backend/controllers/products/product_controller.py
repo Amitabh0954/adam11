@@ -18,7 +18,8 @@ def update_product(product_id: int):
 
 @product_controller.route('/products/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id: int):
-    response = product_service.delete_product(product_id)
+    confirm = request.args.get('confirm', False, type=bool)
+    response = product_service.delete_product(product_id, confirm, request.headers.get('Authorization'))
     return jsonify(response), response['status']
 
 @product_controller.route('/products/search', methods=['GET'])
